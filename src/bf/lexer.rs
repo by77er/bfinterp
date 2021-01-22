@@ -1,20 +1,22 @@
-use super::common::Instruction::*;
+// Takes input text and converts to Tokens
+
+use super::common::Token::*;
 
 use std::io::Read;
 
-pub struct Tokenizer<T: Read> {
+pub struct Lexer<T: Read> {
     source: T,
     eof: bool
 }
 
-impl<T: Read> Tokenizer<T> {
+impl<T: Read> Lexer<T> {
     pub fn new(source: T) -> Self {
         Self { source, eof: false }
     }
 }
 
-impl<T: Read> std::iter::Iterator for Tokenizer<T> {
-    type Item = super::common::Instruction;
+impl<T: Read> std::iter::Iterator for Lexer<T> {
+    type Item = super::common::Token;
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.eof {

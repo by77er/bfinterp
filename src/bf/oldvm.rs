@@ -1,23 +1,23 @@
-use super::common::Instruction;
-use Instruction::*;
+use super::common::Token;
+use Token::*;
 
 use std::io::{Read, Write};
 use std::iter::Iterator;
 
 use std::result::Result;
 
-pub struct BFInterpreter<'a, T: Read, U: Write, V: Iterator<Item=Instruction>> {
+pub struct BFInterpreter<'a, T: Read, U: Write, V: Iterator<Item=Token>> {
     read_stream: &'a mut T,
     write_stream: &'a mut U,
-    instruction_source: V,
-    instruction_buffer: Vec<Instruction>,
+    token_source: V,
+    token_buffer: Vec<Token>,
     memory: Vec<u8>,
     mem_idx: usize,
     stack: Vec<usize>,
     pc: usize
 }
 
-impl<'a, T: Read, U: Write, V: Iterator<Item=Instruction>> BFInterpreter<'a, T, U, V> {
+impl<'a, T: Read, U: Write, V: Iterator<Item=Token>> BFInterpreter<'a, T, U, V> {
     pub fn new(src: V, input: &'a mut T, output: &'a mut U) -> Self {
         Self::with_capacity(src, input, output, 30000)
     }
@@ -26,8 +26,8 @@ impl<'a, T: Read, U: Write, V: Iterator<Item=Instruction>> BFInterpreter<'a, T, 
         Self {
             read_stream: input,
             write_stream: output,
-            instruction_source: src,
-            instruction_buffer: Vec::new(),
+            token_source: src,
+            token_buffer: Vec::new(),
             memory: vec![0; capacity],
             mem_idx: 0,
             stack: Vec::new(),
@@ -36,10 +36,10 @@ impl<'a, T: Read, U: Write, V: Iterator<Item=Instruction>> BFInterpreter<'a, T, 
     }
 
     #[inline]
-    fn read_instructions(&mut self, n: usize) -> Result<usize, ()> {
+    fn read_tokens(&mut self, n: usize) -> Result<usize, ()> {
         for _ in 0..n {
-            if let Some(i) = self.instruction_source.next() {
-                self.instruction_buffer.push(i)
+            if let Some(i) = self.token_source.next() {
+                self.token_buffer.push(i)
             } else {
                 return Err(())
             }
@@ -47,22 +47,22 @@ impl<'a, T: Read, U: Write, V: Iterator<Item=Instruction>> BFInterpreter<'a, T, 
         Ok(n)
     }
 
-    fn get_instruction(&mut self, idx: usize) -> Result<&Instruction, ()> {
-        if self.instruction_buffer.len() < (idx + 1) {
-            match self.read_instructions((idx + 1) - self.instruction_buffer.len()) {
+    fn get_token(&mut self, idx: usize) -> Result<&Token, ()> {
+        if self.token_buffer.len() < (idx + 1) {
+            match self.read_tokens((idx + 1) - self.token_buffer.len()) {
                 Ok(_) => {},
                 Err(()) => return Err(())
             }
         }
-        Ok(&self.instruction_buffer[idx])
+        Ok(&self.token_buffer[idx])
 
     }
 
     pub fn run(&mut self) -> Result<(), &'static str> {
         loop {
-            let ins = match self.get_instruction(self.pc) {
+            let ins = match self.get_token(self.pc) {
                 Ok(i) => i,
-                Err(_) => return Err("Failed to read instruction.")
+                Err(_) => return Err("Failed to read Token.")
             };
             match ins {
                 MoveRight => {
@@ -102,9 +102,9 @@ impl<'a, T: Read, U: Write, V: Iterator<Item=Instruction>> BFInterpreter<'a, T, 
                         let mut count = 1;
                         while count != 0 {
                             self.pc += 1;
-                            let stru = match self.get_instruction(self.pc) {
+                            let stru = match self.get_token(self.pc) {
                                 Ok(i) => i,
-                                Err(_) => return Err("Failed to read instruction.")
+                                Err(_) => return Err("Failed to read Token.")
                             };
                             match stru {
                                 EOF => return Err("Reached EOF while searching for ]. Unmatched [."),
