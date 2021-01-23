@@ -6,7 +6,7 @@ use std::io::Read;
 
 pub struct Lexer<T: Read> {
     source: T,
-    eof: bool
+    eof: bool,
 }
 
 impl<T: Read> Lexer<T> {
@@ -20,13 +20,13 @@ impl<T: Read> std::iter::Iterator for Lexer<T> {
 
     fn next(&mut self) -> Option<Self::Item> {
         if self.eof {
-            return None
+            return None;
         }
         let mut b = [0u8; 1];
         loop {
             match self.source.read(&mut b) {
-                Ok(0) => {},
-                Err(_) => {},
+                Ok(0) => {}
+                Err(_) => {}
                 Ok(_) => {
                     return Some(match b[0] {
                         b'>' => MoveRight,
@@ -37,7 +37,7 @@ impl<T: Read> std::iter::Iterator for Lexer<T> {
                         b',' => Input,
                         b'[' => LeftLoop,
                         b']' => RightLoop,
-                        _ => continue
+                        _ => continue,
                     })
                 }
             }

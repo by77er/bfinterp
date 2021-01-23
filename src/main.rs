@@ -1,8 +1,8 @@
 mod bf;
 
-use std::io::{stdin, stdout};
-use std::io::BufReader;
 use std::fs::File;
+use std::io::BufReader;
+use std::io::{stdin, stdout};
 
 fn main() {
     let r = BufReader::new(File::open("bf/mandelbrot.bf").unwrap());

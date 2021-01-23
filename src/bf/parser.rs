@@ -1,25 +1,22 @@
 // Takes tokens and converts to Nodes in a tree
 
-use super::common::{Token, Node};
+use super::common::{Node, Token};
 
 use std::iter::Iterator;
 
-pub struct Parser<T: Iterator<Item=Token>> {
+pub struct Parser<T: Iterator<Item = Token>> {
     tokens: T,
-    eof: bool
+    eof: bool,
 }
 
-impl<T: Iterator<Item=Token>> Parser<T> {
+impl<T: Iterator<Item = Token>> Parser<T> {
     pub fn new(tokens: T) -> Self {
-        Self {
-            tokens,
-            eof: false
-        }
+        Self { tokens, eof: false }
     }
 
     fn get_node(&mut self) -> Option<Node> {
         if let Some(t) = self.tokens.next() {
-            return Some(match t {
+            Some(match t {
                 Token::MoveRight => Node::MoveRight,
                 Token::MoveLeft => Node::MoveLeft,
                 Token::Increment => Node::Increment,
@@ -29,7 +26,7 @@ impl<T: Iterator<Item=Token>> Parser<T> {
                 Token::EOF => {
                     self.eof = true;
                     Node::Halt
-                },
+                }
                 Token::LeftLoop => {
                     let mut v = Vec::new();
                     while let Some(n) = self.get_node() {
@@ -40,19 +37,17 @@ impl<T: Iterator<Item=Token>> Parser<T> {
                     }
                     Node::Loop(v)
                 }
-                Token::RightLoop => {
-                    return None
-                }
+                Token::RightLoop => return None,
             })
         } else if !self.eof {
             panic!("Error: Iterator ended before EOF");
         } else {
-            return None
+            None
         }
     }
 }
 
-impl<T: Iterator<Item=Token>> Iterator for Parser<T> {
+impl<T: Iterator<Item = Token>> Iterator for Parser<T> {
     type Item = Node;
 
     fn next(&mut self) -> Option<Self::Item> {

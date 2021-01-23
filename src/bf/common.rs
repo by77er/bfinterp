@@ -9,7 +9,7 @@ pub enum Token {
     LeftLoop,
     Output,
     Input,
-    EOF
+    EOF,
 }
 
 /// Intermediate representation
@@ -22,7 +22,7 @@ pub enum Node {
     Decrement,
     Output,
     Input,
-    Halt
+    Halt,
 }
 
 /// Instructions to be executed by the VM
@@ -31,8 +31,9 @@ pub enum Instruction {
     Add(u8),  // Subtraction isn't required
     Jez(u16), // Jumps forward
     Jnz(u16), // Jumps backward
-    Shift(i16),
+    Left(u16),
+    Right(u16),
     Write,
     Read,
-    Halt
+    Halt,
 }
