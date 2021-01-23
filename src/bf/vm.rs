@@ -38,9 +38,47 @@ impl<'a, T: Read, U: Write> Interpreter<'a, T, U> {
     }
 
     pub fn run(&mut self) -> Result<(), &'static str> {
+        let mut total: usize = 0;
         loop {
             let instruction = &self.instructions[self.pc];
+            // println!("inst:{:?}, pc:{}, ptr:{}", instruction, self.pc, self.mem_idx);
             match *instruction {
+                ZeroRight(n) => {
+                    let target = (self.mem_idx + n as usize) % self.memory_size;
+                    while self.mem_idx != target {
+                        self.memory[self.mem_idx] = 0;
+                        self.mem_idx = (self.mem_idx + 1 as usize) % self.memory_size;
+                    }
+                },
+                ZeroLeft(n) => {
+                    let target = (self.mem_idx - n as usize) % self.memory_size;
+                    while self.mem_idx != target {
+                        self.memory[self.mem_idx] = 0;
+                        self.mem_idx = (self.mem_idx - 1 as usize) % self.memory_size;
+                    }
+                },
+                AddMoveRight(n) => {
+                    let new_idx = (self.mem_idx + n as usize) % self.memory_size;
+                    self.memory[new_idx] = self.memory[new_idx].wrapping_add(self.memory[self.mem_idx]);
+                    self.memory[self.mem_idx] = 0;
+                },
+                AddMoveLeft(n) => {
+                    let new_idx = (self.mem_idx - n as usize) % self.memory_size;
+                    self.memory[new_idx] = self.memory[new_idx].wrapping_add(self.memory[self.mem_idx]);
+                    self.memory[self.mem_idx] = 0;
+
+                },
+                SearchLeft(num) => {
+                    while self.memory[self.mem_idx] != 0 {
+                        self.mem_idx = (self.mem_idx - num as usize) % self.memory_size
+                    }
+                },
+                SearchRight(num) => {
+                    while self.memory[self.mem_idx] != 0 {
+                        self.mem_idx = (self.mem_idx + num as usize) % self.memory_size
+                    }
+                }
+                Zero => self.memory[self.mem_idx] = 0,
                 Add(amt) => self.memory[self.mem_idx] = self.memory[self.mem_idx].wrapping_add(amt),
                 Jez(dst) => {
                     if self.memory[self.mem_idx] == 0 {
@@ -68,9 +106,13 @@ impl<'a, T: Read, U: Write> Interpreter<'a, T, U> {
                     Ok(_) => {}
                     Err(_) => return Err("Failed to read from input."),
                 },
-
-                Halt => return Ok(()),
+                Halt => {
+                    println!("{} instructions executed.", total);
+                    // println!("{:?}", &self.memory[0..30]);
+                    return Ok(())
+                },
             }
+            total += 1;
             self.pc += 1;
         }
     }

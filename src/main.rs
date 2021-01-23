@@ -13,6 +13,7 @@ fn main() {
     c.reverse();
 
     // println!("{:?}", c);
+    // println!("total instructions: {:?}", c.len());
 
     let mut si = stdin();
     let mut so = stdout();
