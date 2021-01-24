@@ -26,7 +26,7 @@ pub enum Node {
 }
 
 /// Instructions to be executed by the VM
-#[derive(Debug, Clone, Copy)]
+#[derive(Debug, Clone, Copy, Hash, PartialEq, Eq)]
 pub enum Instruction {
     Add(u8),  // Subtraction isn't required
     Jez(u16), // Jumps forward
@@ -39,6 +39,7 @@ pub enum Instruction {
     AddMoveLeft(u16),
     ZeroRight(u16),
     ZeroLeft(u16),
+    Mandel(u16, u16),
     Zero, // Zero current cell
     Write,
     Read,

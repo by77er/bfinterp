@@ -20,6 +20,7 @@ fn optimize_instruction_chain(instrs: &[Instruction]) -> Vec<Instruction> {
     move_cell(&mut new_instructions);
     zero_area(&mut new_instructions);
     zero_area(&mut new_instructions);
+    mandel(&mut new_instructions);
     new_instructions.reverse();
     new_instructions
 }
@@ -122,6 +123,27 @@ fn zero_area(instrs: &mut Vec<Instruction>) {
             },
             [Instruction::ZeroLeft(n), Instruction::ZeroLeft(n2)] => {
                 instrs.splice(idx..idx+2, [Instruction::ZeroLeft(n+n2)].iter().cloned());
+            },
+            _ => {
+                idx += 1;
+            }
+        }
+    }
+}
+
+// very common sequence in mandelbrot
+// while the current cell isn't 0:
+//   addmove the value of the cell x to the left to the cell x + n to the left, then change cell to current - n
+fn mandel(instrs: &mut Vec<Instruction>) {
+    let mut idx = 0;
+    while idx + 5 <= instrs.len() {
+        match instrs[idx..idx+5] {
+            [Instruction::Jez(4), Instruction::Right(x), Instruction::AddMoveRight(n),  Instruction::Left(q), Instruction::Jnz(4)] => {
+                if x + n == q {
+                    instrs.splice(idx..idx+5, [Instruction::Mandel(x, n)].iter().cloned());
+                } else {
+                    idx += 1;
+                }
             },
             _ => {
                 idx += 1;

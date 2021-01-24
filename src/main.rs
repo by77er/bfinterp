@@ -15,8 +15,10 @@ fn main() {
     // println!("{:?}", c);
     // println!("total instructions: {:?}", c.len());
 
-    let mut si = stdin();
-    let mut so = stdout();
+    let si_r = stdin();
+    let so_r = stdout();
+    let mut si = si_r.lock();
+    let mut so = so_r.lock();
 
     let mut bf = bf::Interpreter::new(&c, &mut si, &mut so);
     bf.run().unwrap();
